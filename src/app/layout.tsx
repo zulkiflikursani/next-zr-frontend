@@ -35,8 +35,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <UiProviders>
           <AuthProvider>
-            <Navbar />
-            <main className="w-full h-screen p-4">{children}</main>
+            <div className="max-h-screen">
+              <Navbar />
+              <main className="w-full max-h-[95vh]  p-4">{children}</main>
+            </div>
           </AuthProvider>
         </UiProviders>
       </body>
