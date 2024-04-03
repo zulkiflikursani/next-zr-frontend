@@ -58,7 +58,7 @@ function ListPenjualan(penjualan: iItem) {
             />
           </div>
           <div className="w-4/12">
-            <Link href={"/dashboard/inventory/create"}>
+            <Link href={"/dashboard/penjualan/create"}>
               <Button className="w-full rounded-full bg-primary text-white">
                 Create
               </Button>

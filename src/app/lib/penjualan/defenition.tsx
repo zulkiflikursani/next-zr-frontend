@@ -13,3 +13,15 @@ export type iPenjualan = {
   created_at: string | null;
   updated_at: string | null;
 };
+
+export type iKeranjang = {
+  company: string | null | undefined;
+  tanggal_transaksi: DateTime | null | undefined;
+  kode_penjualan: string | null | undefined;
+  product_id: string | null | undefined;
+  id_customer: string | null | undefined;
+  nama_product: string | undefined;
+  hjual: number;
+  qty: number;
+  total: number;
+};

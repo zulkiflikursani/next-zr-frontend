@@ -1,7 +1,5 @@
-import SearchInputComponent from "@/app/component/SearchInputComponent";
-import TittlePageComponent from "@/app/component/TittlePageComponent";
 import ListPenjualan from "@/app/component/penjualan/ListPenjualan";
-import { getPenjualanById } from "@/app/lib/penjualan/data";
+import { getPenjualanByDate } from "@/app/lib/penjualan/data";
 import React from "react";
 
 async function penjualan() {
@@ -11,7 +9,7 @@ async function penjualan() {
   const day = currentDate.getDate();
 
   const formattedDate = `${year}-${month}-${day}`;
-  const dataPenjualan = await getPenjualanById(formattedDate);
+  const dataPenjualan = await getPenjualanByDate(formattedDate);
   return (
     <div className="h-[80vh]">
       <ListPenjualan item={dataPenjualan} />
