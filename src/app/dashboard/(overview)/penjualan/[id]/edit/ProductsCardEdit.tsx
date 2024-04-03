@@ -80,7 +80,7 @@ function ProductsCardEdit(props: iProps) {
     openPoroductModal();
     setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
     setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
-  }, [dataPenjualan]);
+  }, [dataPenjualan, openPoroductModal]);
   const handleModal = (product: Product) => {
     console.log("handle Modal");
     setDataPenjualan([
