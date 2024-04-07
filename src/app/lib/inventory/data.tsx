@@ -13,7 +13,7 @@ export async function ProdutById(id: string) {
   noStore();
   try {
     const res = await fetch(
-      `http://127.0.0.1:8000/api/v1/products/${id}/${company}/product`,
+      `${process.env.NEXT_PUBLIC_API_URL}products/${id}/${company}/product`,
       {
         credentials: "include",
         headers: {
@@ -34,7 +34,7 @@ export async function Products() {
   const company = session?.user.company;
   try {
     const res = await fetch(
-      `http://127.0.0.1:8000/api/v1/products/${company}/company`,
+      `${process.env.NEXT_PUBLIC_API_URL}products/${company}/company`,
       {
         credentials: "include",
         headers: {
