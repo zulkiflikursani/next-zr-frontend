@@ -2,7 +2,7 @@
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
 import { Product } from "@/app/lib/inventory/defenition";
-import { Checkout, CheckoutUpdate } from "../../../../../lib/penjualan/action";
+import { Checkout } from "../../../../lib/pembelian/action";
 import { format } from "date-fns";
 
 import {
@@ -19,10 +19,9 @@ import {
 
 import { DateTime } from "next-auth/providers/kakao";
 import React, { useEffect, useState } from "react";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import TrashIcon from "@heroicons/react/24/solid/TrashIcon";
 import NotificationModal from "@/app/component/NotificationModal";
-import { redirect } from "next/dist/server/api-utils";
-import { revalidate } from "@/app/lib/inventory/revalidate";
+
 interface iUser {
   id: number;
   name: string;
@@ -35,21 +34,19 @@ interface iUser {
 interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
-  keranjang: iKeranjang[];
-  kodePenjualan: string;
 }
 interface iKeranjang {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
 }
-function ProductsCardEdit(props: iProps) {
+function ProductsCard(props: iProps) {
   const {
     isOpen: producModal,
     onOpen: openPoroductModal,
@@ -65,15 +62,12 @@ function ProductsCardEdit(props: iProps) {
     onOpen: openNotif,
     onClose: closeNotif,
   } = useDisclosure();
-  const [dataPenjualan, setDataPenjualan] = useState<iKeranjang[]>(
-    props.keranjang
-  );
+
+  const [dataPembelian, setDataPembelian] = useState<iKeranjang[]>([]);
   const [totqty, setTotqty] = useState<number>(0);
-  const [totalpenjualan, setTotalpenjualan] = useState<number>(0);
+  const [totalPembelian, setTotalpembelian] = useState<number>(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
-
-  const [kodePenjualan, setKodePenjualan] = useState(props.kodePenjualan);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -84,34 +78,32 @@ function ProductsCardEdit(props: iProps) {
 
   const formattedDate = formatDate(currentDate);
   const items: Product[] = props.items;
+
   const filterArray = (array: Product[]) => {
     return array.filter((el: Product) => el.nama.toLowerCase().includes(query));
   };
 
-  const filteredProduct: Product[] = filterArray(items);
+  const filteredProdcut: Product[] = filterArray(items);
   const handleChange = (e: any) => {
-    console.log("on Search");
     setQuery(e.target.value);
   };
   useEffect(() => {
-    openPoroductModal();
-    setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
-  }, [dataPenjualan, openPoroductModal]);
+    setTotqty(dataPembelian.reduce((acc, curr) => acc + curr.qty, 0));
+    setTotalpembelian(dataPembelian.reduce((acc, curr) => acc + curr.total, 0));
+  }, [dataPembelian]);
   const handleModal = (product: Product) => {
-    console.log("handle Modal");
-    setDataPenjualan([
-      ...dataPenjualan,
+    setDataPembelian([
+      ...dataPembelian,
       {
         company: props.userInfo?.company,
         tanggal_transaksi: formattedDate,
-        kode_penjualan: kodePenjualan,
+        kode_pembelian: "asdasd",
         product_id: product.id.toString(),
         id_customer: "",
         nama_product: product.nama,
-        hjual: product.hjual,
+        hbeli: product.hbeli,
         qty: 1,
-        total: product.hjual,
+        total: product.hbeli,
       },
     ]);
     if (!producModal) {
@@ -119,11 +111,21 @@ function ProductsCardEdit(props: iProps) {
       openPoroductModal();
     }
   };
-  const handleQtyChange = (index: any, newValue: number, hjual: number) => {
-    setDataPenjualan((prevData) => {
+  const handleQtyChange = (index: any, newValue: number, hbeli: number) => {
+    setDataPembelian((prevData) => {
       const newData = [...prevData];
       newData[index].qty = newValue;
-      newData[index].total = newValue * hjual;
+      newData[index].total = newValue * hbeli;
+      return newData;
+    });
+  };
+
+  const handleHjualChange = (index: any, newValue: number, qty: number) => {
+    setDataPembelian((prevData) => {
+      const newData = [...prevData];
+      newData[index].hbeli = newValue;
+      newData[index].total = newValue * qty;
+
       return newData;
     });
   };
@@ -140,33 +142,30 @@ function ProductsCardEdit(props: iProps) {
 
   const onCloseConfirm = () => {
     closeConfirmModal();
-  };
-
-  const onCloseNotif = () => {
-    closeNotif();
-    revalidate("/dashboard/penjualan", "page", true);
+    console.log("confirm", confirm);
   };
 
   const checkOut = async () => {
-    const { message } = await CheckoutUpdate(kodePenjualan, dataPenjualan);
+    const { message } = await Checkout(dataPembelian);
+
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
-      // setDataPenjualan([]);
       closeConfirmModal();
+      setDataPembelian([]);
     } else {
       openNotif();
       closeConfirmModal();
-      openNotif();
+
       setMessageNotif(message.error);
     }
   };
-
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjang[] = await dataPenjualan.filter(
+    const updateDataPenjualang: iKeranjang[] = await dataPembelian.filter(
       (obj) => obj.product_id !== id
     );
-    setDataPenjualan(updateDataPenjualang);
+
+    setDataPembelian(updateDataPenjualang);
     return updateDataPenjualang;
   };
   return (
@@ -178,10 +177,9 @@ function ProductsCardEdit(props: iProps) {
         <NotificationModal
           message={messageNotif}
           isOpen={isOpenNotif}
-          onClose={onCloseNotif}
+          onClose={closeNotif}
         />
       )}
-      {/* confirm modal */}
       <Modal size="5xl" isOpen={confirmModalOpen} onClose={onCloseConfirm}>
         <ModalContent>
           {(onClose) => (
@@ -212,13 +210,13 @@ function ProductsCardEdit(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10">
-        {filteredProduct.map((items) => {
+      <div className="grid  grid-cols-1 md:grid-cols-4  gap-1 z-10">
+        {filteredProdcut.map((items) => {
           return (
             <CardInventory
               key={items.id}
               items={items}
-              jenis="penjualan"
+              jenis="pembelian"
               onClick={() => handleModal(items)}
             />
           );
@@ -231,8 +229,8 @@ function ProductsCardEdit(props: iProps) {
               <ModalHeader>Daftar Penjualan</ModalHeader>
               <ModalBody>
                 <div>
-                  {dataPenjualan &&
-                    dataPenjualan.map((items, index) => {
+                  {dataPembelian &&
+                    dataPembelian.map((items, index) => {
                       return (
                         <Card key={index} className="mb-2">
                           <CardBody>
@@ -241,8 +239,15 @@ function ProductsCardEdit(props: iProps) {
                                 <div>{items.nama_product}</div>
                                 <input
                                   type="number"
-                                  className="bg-gray-200 rounded-lg px-2 "
-                                  defaultValue={items.hjual}
+                                  className="bg-gray-200 rounded-lg px-2 appearance-none  "
+                                  defaultValue={items.hbeli}
+                                  onChange={(e) =>
+                                    handleHjualChange(
+                                      index,
+                                      parseInt(e.target.value),
+                                      items.qty
+                                    )
+                                  }
                                 />
                                 {/* Rp {items.hjual} */}
                               </div>
@@ -255,7 +260,7 @@ function ProductsCardEdit(props: iProps) {
                                     handleQtyChange(
                                       index,
                                       parseInt(e.target.value),
-                                      items.hjual
+                                      items.hbeli
                                     )
                                   }
                                 />
@@ -265,7 +270,7 @@ function ProductsCardEdit(props: iProps) {
                                 <div>Rp {items.total}</div>
                               </div>
                               <div
-                                className="flex items-center col-span-1"
+                                className="flex items-center col-span-1 justify-center rounded-lg hover:bg-primary hover:text-white"
                                 onClick={() =>
                                   removeKeranjangProduct(
                                     items.product_id as string
@@ -290,7 +295,7 @@ function ProductsCardEdit(props: iProps) {
                         <div> {totqty} pcs</div>
                       </div>
                       <div className="flex items-center col-span-3 justify-end">
-                        <div>Rp {totalpenjualan}</div>
+                        <div>Rp {totalPembelian}</div>
                       </div>
                     </div>
                   </CardBody>
@@ -312,4 +317,4 @@ function ProductsCardEdit(props: iProps) {
   );
 }
 
-export default ProductsCardEdit;
+export default ProductsCard;

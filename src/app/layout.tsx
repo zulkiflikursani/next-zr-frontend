@@ -13,6 +13,7 @@ const inter = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 export const viewport: Viewport = {
+  themeColor: "#FF407D",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -22,7 +23,19 @@ export const viewport: Viewport = {
 };
 export const metadata: Metadata = {
   title: "Zr Kasir",
+  manifest: "/manifest.json",
   description: "Aplikasi Kasir",
+  appleWebApp: {
+    title: "Zr Kasir",
+    statusBarStyle: "black-translucent",
+    startupImage: [
+      "/faticon.ico",
+      {
+        url: "/faticon.ico",
+        media: "(device-width: 768px) and (device-height: 1024px)",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -32,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className + "font-poppin"}>
         <UiProviders>
           <AuthProvider>
             <div className="max-h-screen">

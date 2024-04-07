@@ -2,7 +2,7 @@
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
 import { Product } from "@/app/lib/inventory/defenition";
-import { Checkout, CheckoutUpdate } from "../../../../../lib/penjualan/action";
+import { Checkout, CheckoutUpdate } from "../../../../../lib/pembelian/action";
 import { format } from "date-fns";
 
 import {
@@ -36,16 +36,16 @@ interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
   keranjang: iKeranjang[];
-  kodePenjualan: string;
+  kodePembelian: string;
 }
 interface iKeranjang {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
 }
@@ -65,15 +65,15 @@ function ProductsCardEdit(props: iProps) {
     onOpen: openNotif,
     onClose: closeNotif,
   } = useDisclosure();
-  const [dataPenjualan, setDataPenjualan] = useState<iKeranjang[]>(
+  const [dataPembelian, setDataPembelian] = useState<iKeranjang[]>(
     props.keranjang
   );
   const [totqty, setTotqty] = useState<number>(0);
-  const [totalpenjualan, setTotalpenjualan] = useState<number>(0);
+  const [totalPembelian, setTotalpembelian] = useState<number>(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
 
-  const [kodePenjualan, setKodePenjualan] = useState(props.kodePenjualan);
+  const [kodePembelian, setKodePembelian] = useState(props.kodePembelian);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -95,21 +95,21 @@ function ProductsCardEdit(props: iProps) {
   };
   useEffect(() => {
     openPoroductModal();
-    setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
-  }, [dataPenjualan, openPoroductModal]);
+    setTotqty(dataPembelian.reduce((acc, curr) => acc + curr.qty, 0));
+    setTotalpembelian(dataPembelian.reduce((acc, curr) => acc + curr.total, 0));
+  }, [dataPembelian, openPoroductModal]);
   const handleModal = (product: Product) => {
     console.log("handle Modal");
-    setDataPenjualan([
-      ...dataPenjualan,
+    setDataPembelian([
+      ...dataPembelian,
       {
         company: props.userInfo?.company,
         tanggal_transaksi: formattedDate,
-        kode_penjualan: kodePenjualan,
+        kode_pembelian: kodePembelian,
         product_id: product.id.toString(),
         id_customer: "",
         nama_product: product.nama,
-        hjual: product.hjual,
+        hbeli: product.hbeli,
         qty: 1,
         total: product.hjual,
       },
@@ -119,11 +119,11 @@ function ProductsCardEdit(props: iProps) {
       openPoroductModal();
     }
   };
-  const handleQtyChange = (index: any, newValue: number, hjual: number) => {
-    setDataPenjualan((prevData) => {
+  const handleQtyChange = (index: any, newValue: number, hbeli: number) => {
+    setDataPembelian((prevData) => {
       const newData = [...prevData];
       newData[index].qty = newValue;
-      newData[index].total = newValue * hjual;
+      newData[index].total = newValue * hbeli;
       return newData;
     });
   };
@@ -144,11 +144,11 @@ function ProductsCardEdit(props: iProps) {
 
   const onCloseNotif = () => {
     closeNotif();
-    revalidate("/dashboard/penjualan", "page", true);
+    revalidate("/dashboard/pembelian", "page", true);
   };
 
   const checkOut = async () => {
-    const { message } = await CheckoutUpdate(kodePenjualan, dataPenjualan);
+    const { message } = await CheckoutUpdate(kodePembelian, dataPembelian);
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
@@ -163,10 +163,10 @@ function ProductsCardEdit(props: iProps) {
   };
 
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjang[] = await dataPenjualan.filter(
+    const updateDataPenjualang: iKeranjang[] = await dataPembelian.filter(
       (obj) => obj.product_id !== id
     );
-    setDataPenjualan(updateDataPenjualang);
+    setDataPembelian(updateDataPenjualang);
     return updateDataPenjualang;
   };
   return (
@@ -218,7 +218,7 @@ function ProductsCardEdit(props: iProps) {
             <CardInventory
               key={items.id}
               items={items}
-              jenis="penjualan"
+              jenis="pembelian"
               onClick={() => handleModal(items)}
             />
           );
@@ -231,8 +231,8 @@ function ProductsCardEdit(props: iProps) {
               <ModalHeader>Daftar Penjualan</ModalHeader>
               <ModalBody>
                 <div>
-                  {dataPenjualan &&
-                    dataPenjualan.map((items, index) => {
+                  {dataPembelian &&
+                    dataPembelian.map((items, index) => {
                       return (
                         <Card key={index} className="mb-2">
                           <CardBody>
@@ -242,7 +242,7 @@ function ProductsCardEdit(props: iProps) {
                                 <input
                                   type="number"
                                   className="bg-gray-200 rounded-lg px-2 "
-                                  defaultValue={items.hjual}
+                                  defaultValue={items.hbeli}
                                 />
                                 {/* Rp {items.hjual} */}
                               </div>
@@ -255,7 +255,7 @@ function ProductsCardEdit(props: iProps) {
                                     handleQtyChange(
                                       index,
                                       parseInt(e.target.value),
-                                      items.hjual
+                                      items.hbeli
                                     )
                                   }
                                 />
@@ -290,7 +290,7 @@ function ProductsCardEdit(props: iProps) {
                         <div> {totqty} pcs</div>
                       </div>
                       <div className="flex items-center col-span-3 justify-end">
-                        <div>Rp {totalpenjualan}</div>
+                        <div>Rp {totalPembelian}</div>
                       </div>
                     </div>
                   </CardBody>

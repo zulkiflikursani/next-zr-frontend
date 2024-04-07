@@ -3,13 +3,13 @@ import React from "react";
 import { DeleteButton } from "../inventory/DeleteButton";
 // import { EditIcon } from "../EditIcon";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
-import { iPenjualan } from "@/app/lib/penjualan/defenition";
 import Link from "next/link";
+import { iPembelian } from "@/app/lib/pembelian/defenition";
 
 interface iProps {
-  items: iPenjualan;
+  items: iPembelian;
 }
-function CardListPenjualan(props: iProps) {
+function CardListPembelian(props: iProps) {
   return (
     <div>
       <Card>
@@ -19,16 +19,16 @@ function CardListPenjualan(props: iProps) {
               <div className="w-full">{props.items.tanggal_transaksi}</div>
               {/* <div className="flex ÷"> */}
               <div className="flex justify-around w-full">
-                <div>{props.items.kode_penjualan}</div>
+                <div>{props.items.kode_pembelian}</div>
                 <div>{props.items.nama_product}</div>
                 <div className="min-w-[40px] text-right">
                   {props.items.qty} pcs
                 </div>
                 <div className="min-w-[60px] text-right">
-                  Rp.{props.items.hjual}
+                  Rp.{props.items.hbeli}
                 </div>
                 <div className="min-w-[70px] text-right">
-                  Rp. {props.items.qty * props.items.hjual}
+                  Rp. {props.items.qty * props.items.hbeli}
                 </div>
               </div>
               {/* </div>÷ */}
@@ -38,7 +38,7 @@ function CardListPenjualan(props: iProps) {
                 <TrashIcon className="w-3 " />
               </div> */}
               <Link
-                href={`/dashboard/penjualan/${props.items.kode_penjualan}/edit`}
+                href={`/dashboard/pembelian/${props.items.kode_pembelian}/edit`}
                 className="bg-secondary p-1 rounded-md cursor-pointer hover:bg-primary"
               >
                 <PencilIcon className="w-3" />
@@ -51,4 +51,4 @@ function CardListPenjualan(props: iProps) {
   );
 }
 
-export default CardListPenjualan;
+export default CardListPembelian;

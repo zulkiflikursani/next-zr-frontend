@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const cookie = req.cookies;
-  const data = await req.json();
-  const id = params.id;
+export async function POST(request: NextRequest) {
+  const cookie = request.cookies;
+  const data = await request.json();
+
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}pembelian/insert`,
       {
-        method: "PUT",
+        method: "POST",
         credentials: "include",
         headers: {
           Cookie: `jwt=${cookie.get("jwt")?.value}`,
@@ -19,11 +16,16 @@ export async function PUT(
         body: JSON.stringify(data),
       }
     );
+
     const response = await res.json();
+
     return NextResponse.json({
       message: response,
     });
   } catch (error) {
     console.error(error);
+    return NextResponse.json({
+      message: "Database error",
+    });
   }
 }

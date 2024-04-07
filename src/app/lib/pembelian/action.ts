@@ -1,14 +1,13 @@
 import { DateTime } from "next-auth/providers/kakao";
-import { iPenjualan } from "./defenition";
 import { z } from "zod";
 interface iKeranjang {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
 }
@@ -27,11 +26,11 @@ const jsonDataScame = z.array(
           "Tanggal transaksi format. Expected format: YYYY-MM-DD HH:MM:SS",
       }
     ),
-    kode_penjualan: z.string(),
+    kode_pembelian: z.string(),
     product_id: z.string(),
     id_customer: z.string().nullable(),
     nama_product: z.string(),
-    hjual: z.number(),
+    hbeli: z.number(),
     qty: z.number(),
   })
 );
@@ -39,12 +38,13 @@ export async function Checkout(request: iKeranjang[]) {
   try {
     jsonDataScame.parse(request);
     try {
-      const res = await fetch("/api/penjualan", {
+      const res = await fetch("/api/pembelian", {
         method: "POST",
         credentials: "include",
         body: JSON.stringify(request),
       });
       const response = await res.json();
+      console.log("action response", response);
       return response;
     } catch (error) {
       console.error("Post data error");
@@ -53,23 +53,24 @@ export async function Checkout(request: iKeranjang[]) {
       //   };
     }
   } catch (error: any) {
+    console.error(error);
     const errorResponse: { error: string[]; status: string } = {
       status: "gagal",
       error: error.errors.map((e: any) => e.message), // Extract error messages
     };
     return errorResponse;
   }
-  return request;
+  // return request;
 }
 
 export async function CheckoutUpdate(
-  kodePenjualan: string,
+  kodePembelian: string,
   request: iKeranjang[]
 ) {
   try {
     jsonDataScame.parse(request);
     try {
-      const res = await fetch(`/api/penjualan/${kodePenjualan}`, {
+      const res = await fetch(`/api/pembelian/${kodePembelian}`, {
         method: "PUT",
         credentials: "include",
         body: JSON.stringify(request),

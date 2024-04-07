@@ -9,7 +9,7 @@ export async function PUT(
   const id = params.id;
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}pembelian/${id}`,
       {
         method: "PUT",
         credentials: "include",

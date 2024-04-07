@@ -16,10 +16,12 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { Session } from "next-auth";
 
 import { DateTime } from "next-auth/providers/kakao";
 import React, { useEffect, useState } from "react";
+import TrashIcon from "@heroicons/react/24/solid/TrashIcon";
+import NotificationModal from "@/app/component/NotificationModal";
+
 interface iUser {
   id: number;
   name: string;
@@ -55,10 +57,17 @@ function ProductsCard(props: iProps) {
     onOpen: openConfirmModal,
     onClose: closeConfirmModal,
   } = useDisclosure();
+  const {
+    isOpen: isOpenNotif,
+    onOpen: openNotif,
+    onClose: closeNotif,
+  } = useDisclosure();
 
   const [dataPenjualan, setDataPenjualan] = useState<iKeranjang[]>([]);
   const [totqty, setTotqty] = useState<number>(0);
   const [totalpenjualan, setTotalpenjualan] = useState<number>(0);
+  const [query, setQuery] = useState("");
+  const [messageNotif, setMessageNotif] = useState("");
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -70,15 +79,19 @@ function ProductsCard(props: iProps) {
   const formattedDate = formatDate(currentDate);
   const items: Product[] = props.items;
 
-  const handleChange = () => {
-    console.log("on Search");
+  const filterArray = (array: Product[]) => {
+    return array.filter((el: Product) => el.nama.toLowerCase().includes(query));
+  };
+
+  const filteredProdcut: Product[] = filterArray(items);
+  const handleChange = (e: any) => {
+    setQuery(e.target.value);
   };
   useEffect(() => {
     setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
     setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
   }, [dataPenjualan]);
   const handleModal = (product: Product) => {
-    console.log("handle Modal");
     setDataPenjualan([
       ...dataPenjualan,
       {
@@ -107,6 +120,16 @@ function ProductsCard(props: iProps) {
     });
   };
 
+  const handleHjualChange = (index: any, newValue: number, qty: number) => {
+    setDataPenjualan((prevData) => {
+      const newData = [...prevData];
+      newData[index].hjual = newValue;
+      newData[index].total = newValue * qty;
+
+      return newData;
+    });
+  };
+
   const checkOutConfirm = () => {
     closeProductModal();
     if (!confirmModalOpen) {
@@ -123,11 +146,41 @@ function ProductsCard(props: iProps) {
   };
 
   const checkOut = async () => {
-    const penjualan = await Checkout(dataPenjualan);
+    const { message } = await Checkout(dataPenjualan);
+
+    if (message.status === "ok") {
+      setMessageNotif(message.message);
+      openNotif();
+      closeConfirmModal();
+      setDataPenjualan([]);
+    } else {
+      openNotif();
+      closeConfirmModal();
+
+      setMessageNotif(message.error);
+    }
+    // console.log(penjualan);
+  };
+  const removeKeranjangProduct = async (id: string) => {
+    const updateDataPenjualang: iKeranjang[] = await dataPenjualan.filter(
+      (obj) => obj.product_id !== id
+    );
+
+    setDataPenjualan(updateDataPenjualang);
+    return updateDataPenjualang;
   };
   return (
     <div>
       {/* confirm modal */}
+      {!messageNotif ? (
+        ""
+      ) : (
+        <NotificationModal
+          message={messageNotif}
+          isOpen={isOpenNotif}
+          onClose={closeNotif}
+        />
+      )}
       <Modal size="5xl" isOpen={confirmModalOpen} onClose={onCloseConfirm}>
         <ModalContent>
           {(onClose) => (
@@ -158,12 +211,13 @@ function ProductsCard(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-2 md:grid-cols-6  gap-1 z-10">
-        {items.map((items) => {
+      <div className="grid  grid-cols-1 md:grid-cols-4  gap-1 z-10">
+        {filteredProdcut.map((items) => {
           return (
             <CardInventory
               key={items.id}
               items={items}
+              jenis="penjualan"
               onClick={() => handleModal(items)}
             />
           );
@@ -182,12 +236,19 @@ function ProductsCard(props: iProps) {
                         <Card key={index} className="mb-2">
                           <CardBody>
                             <div className="grid grid-cols-10 gap-2 text-[10px] ">
-                              <div className="flex flex-col col-span-6  ">
+                              <div className="flex flex-col col-span-5  ">
                                 <div>{items.nama_product}</div>
                                 <input
                                   type="number"
-                                  className="bg-gray-200 rounded-lg px-2 w-fit appearance-none  "
+                                  className="bg-gray-200 rounded-lg px-2 appearance-none  "
                                   defaultValue={items.hjual}
+                                  onChange={(e) =>
+                                    handleHjualChange(
+                                      index,
+                                      parseInt(e.target.value),
+                                      items.qty
+                                    )
+                                  }
                                 />
                                 {/* Rp {items.hjual} */}
                               </div>
@@ -208,6 +269,16 @@ function ProductsCard(props: iProps) {
                               <div className="flex items-center col-span-2 justify-end">
                                 {/* <div>Rp {items.qty * items.hjual}</div> */}
                                 <div>Rp {items.total}</div>
+                              </div>
+                              <div
+                                className="flex items-center col-span-1 justify-center rounded-lg hover:bg-primary hover:text-white"
+                                onClick={() =>
+                                  removeKeranjangProduct(
+                                    items.product_id as string
+                                  )
+                                }
+                              >
+                                <TrashIcon width={10} />
                               </div>
                             </div>
                           </CardBody>
@@ -236,7 +307,7 @@ function ProductsCard(props: iProps) {
                   Close
                 </Button>
                 <Button color="primary" onPress={checkOutConfirm}>
-                  Action
+                  Checkout
                 </Button>
               </ModalFooter>
             </>
