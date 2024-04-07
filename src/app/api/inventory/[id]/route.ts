@@ -8,15 +8,18 @@ export async function PUT(
   const data = await req.json();
   const id = params.id;
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/products/${id}`, {
-      method: "PUT",
-      credentials: "include",
-      headers: {
-        Cookie: `jwt=${cookie.get("jwt")?.value}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}products/${id}`,
+      {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          Cookie: `jwt=${cookie.get("jwt")?.value}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      }
+    );
     const response = await res.json();
     return NextResponse.json({
       message: "success",
@@ -38,14 +41,17 @@ export async function DELETE(
   const id = params.id;
 
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/products/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-      headers: {
-        Cookie: `jwt=${cookie.get("jwt")?.value}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}products/${id}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Cookie: `jwt=${cookie.get("jwt")?.value}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const response = await res.json();
     return NextResponse.json({
       message: response.message,
