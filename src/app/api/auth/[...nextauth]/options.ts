@@ -19,16 +19,19 @@ export const options: NextAuthOptions = {
         },
       },
       async authorize(credentials) {
-        const res = await fetch("http://127.0.0.1:8000/api/v1/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: credentials?.username,
-            password: credentials?.password,
-          }),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}auth/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: credentials?.username,
+              password: credentials?.password,
+            }),
+          }
+        );
 
         const user = await res.json();
         cookies().set("jwt", user.accessToken);
