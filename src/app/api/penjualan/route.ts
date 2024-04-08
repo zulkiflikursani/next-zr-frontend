@@ -5,14 +5,17 @@ export async function POST(request: NextRequest) {
   const data = await request.json();
   // console.log("data req", data);
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/v1/penjualan/insert", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        Cookie: `jwt=${cookie.get("jwt")?.value}`,
-      },
-      body: JSON.stringify(data),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}penjualan/insert`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Cookie: `jwt=${cookie.get("jwt")?.value}`,
+        },
+        body: JSON.stringify(data),
+      }
+    );
 
     const response = await res.json();
     // console.log(response);
