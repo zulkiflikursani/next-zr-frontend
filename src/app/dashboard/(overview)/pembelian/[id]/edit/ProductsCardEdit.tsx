@@ -85,7 +85,9 @@ function ProductsCardEdit(props: iProps) {
   const formattedDate = formatDate(currentDate);
   const items: Product[] = props.items;
   const filterArray = (array: Product[]) => {
-    return array.filter((el: Product) => el.nama.toLowerCase().includes(query));
+    return array.filter((el: Product) =>
+      el.nama.toLowerCase().includes(query.toLowerCase())
+    );
   };
 
   const filteredProduct: Product[] = filterArray(items);

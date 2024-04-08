@@ -16,7 +16,9 @@ function Inventory(item: iItems) {
   // const items = items;
   const products: any = item.items;
   const searchFilter = (array: any) => {
-    return array.filter((el: Product) => el.nama.toLowerCase().includes(query));
+    return array.filter((el: Product) =>
+      el.nama.toLowerCase().includes(query.toLowerCase())
+    );
   };
 
   //Applying our search filter function to our array of ountries recieved from the API
