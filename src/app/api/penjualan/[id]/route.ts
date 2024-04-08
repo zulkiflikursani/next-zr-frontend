@@ -9,9 +9,9 @@ export async function PUT(
   const id = params.id;
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${id}?_method=PUT`,
       {
-        method: "PUT",
+        method: "POST",
         credentials: "include",
         headers: {
           Cookie: `jwt=${cookie.get("jwt")?.value}`,
