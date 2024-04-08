@@ -29,14 +29,17 @@ export async function getPenjualanByDate(date: string) {
 export async function getPenjualanById(id: string) {
   const cookie = cookies().get("jwt");
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/v1/penjualan/${id}`, {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        Cookie: `jwt=${cookie?.value}`,
-      },
-      cache: "no-store",
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${id}`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Cookie: `jwt=${cookie?.value}`,
+        },
+        cache: "no-store",
+      }
+    );
     const dataPenjualan = await res.json();
     let keranjang: iKeranjang[] = [];
     await dataPenjualan.map(async (items: iPenjualan) => {
