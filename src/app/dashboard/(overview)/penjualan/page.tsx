@@ -15,13 +15,16 @@ async function penjualan() {
     // second: "2-digit",
     // hour12: false,
   };
-  const formattedDate = currentDate.toLocaleDateString("en-US", options);
-  // const year = currentDate.getFullYear();
-  // const month = currentDate.getMonth() + 1; // Months are zero-based, so we add 1
-  // const day = currentDate.getDate();
+  const now = currentDate.toLocaleDateString("en-US", options);
 
-  // const formattedDate = `${year}-${month}-${day}`;
-  const dataPenjualan = await getPenjualanByDate(formattedDate);
+  const [month, day, year] = now.split("/").map((part) => parseInt(part));
+
+  const formattedMonth = month < 10 ? `0${month}` : month;
+  const formattedDay = day < 10 ? `0${day}` : day;
+
+  const formattedDateYmD = `${year}-${formattedMonth}-${formattedDay}`;
+
+  const dataPenjualan = await getPenjualanByDate(formattedDateYmD);
   return (
     <div className="h-[80vh]">
       <ListPenjualan item={dataPenjualan} />
