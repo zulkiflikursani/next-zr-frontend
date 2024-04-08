@@ -2,11 +2,13 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import { cookies } from "next/headers";
 import { iKeranjang, iPembelian } from "./defenition";
+import { unstable_noStore as noStore } from "next/cache";
 
 export async function getPembelianByDate(date: string) {
   const cookie = cookies().get("jwt");
   const session = await getServerSession(options);
   const company = session?.user.company;
+  noStore();
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}pembelian/${date}/${company}/pembelian`,
