@@ -80,7 +80,9 @@ function ProductsCard(props: iProps) {
   const items: Product[] = props.items;
 
   const filterArray = (array: Product[]) => {
-    return array.filter((el: Product) => el.nama.toLowerCase().includes(query));
+    return array.filter((el: Product) =>
+      el.nama.toLowerCase().includes(query.toLowerCase())
+    );
   };
 
   const filteredProdcut: Product[] = filterArray(items);

@@ -22,9 +22,9 @@ async function penjualan() {
   const formattedMonth = month < 10 ? `0${month}` : month;
   const formattedDay = day < 10 ? `0${day}` : day;
 
-  const formattedDateYmD = `${year}-${formattedMonth}-${formattedDay}`;
+  const formattedDate = `${year}-${formattedMonth}-${formattedDay}`;
 
-  const dataPenjualan = await getPenjualanByDate(formattedDateYmD);
+  const dataPenjualan = await getPenjualanByDate(formattedDate);
   return (
     <div className="h-[80vh]">
       <ListPenjualan item={dataPenjualan} />
