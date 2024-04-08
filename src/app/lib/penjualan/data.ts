@@ -9,7 +9,7 @@ export async function getPenjualanByDate(date: string) {
   const company = session?.user.company;
   try {
     const res = await fetch(
-      `http://127.0.0.1:8000/api/v1/penjualan/${date}/${company}/penjualan`,
+      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${date}/${company}/penjualan`,
       {
         method: "GET",
         credentials: "include",
