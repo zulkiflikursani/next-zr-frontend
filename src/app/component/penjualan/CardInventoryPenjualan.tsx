@@ -10,7 +10,7 @@ interface iProps {
 function CardInventory(props: iProps) {
   return (
     <div>
-      <Card className="rounded-tr-3xl h-full rounded-tl-none rounded-bl-3xl rounded-br-none p-0">
+      <Card className="rounded-tr-3xl h-fit border-1 rounded-tl-none rounded-bl-3xl rounded-br-none p-0 border-gray-400">
         <CardBody className="m-0 p-2">
           {/* <Image
             src={"/images/bg-zr.jpg"}

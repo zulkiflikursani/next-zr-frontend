@@ -68,6 +68,7 @@ function ProductsCard(props: iProps) {
   const [totalpenjualan, setTotalpenjualan] = useState<number>(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -148,6 +149,7 @@ function ProductsCard(props: iProps) {
   };
 
   const checkOut = async () => {
+    setIsProcessing(true);
     const { message } = await Checkout(dataPenjualan);
 
     if (message.status === "ok") {
@@ -155,10 +157,11 @@ function ProductsCard(props: iProps) {
       openNotif();
       closeConfirmModal();
       setDataPenjualan([]);
+      setIsProcessing(false);
     } else {
       openNotif();
       closeConfirmModal();
-
+      setIsProcessing(false);
       setMessageNotif(message.error);
     }
     // console.log(penjualan);
@@ -197,8 +200,12 @@ function ProductsCard(props: iProps) {
                 <Button color="secondary" onPress={onCloseConfirm}>
                   Tidak
                 </Button>
-                <Button color="primary" onPress={checkOut}>
-                  Ya
+                <Button
+                  color="primary"
+                  onPress={checkOut}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : "Ya"}
                 </Button>
               </ModalFooter>
             </>

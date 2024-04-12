@@ -64,3 +64,27 @@ export async function getPenjualanById(id: string) {
     return [];
   }
 }
+
+export async function getTotalPenjualanByDate(date: string) {
+  const cookie = cookies().get("jwt");
+  const session = await getServerSession(options);
+  const company = session?.user.company;
+  noStore();
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}penjualan/${date}/${company}/penjualan/total`,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          Cookie: `jwt=${cookie?.value}`,
+        },
+        cache: "no-store",
+      }
+    );
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("error get penjualan", error);
+  }
+}

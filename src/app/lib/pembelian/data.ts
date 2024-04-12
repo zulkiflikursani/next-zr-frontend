@@ -64,3 +64,21 @@ export async function getPembelianById(id: string) {
     return [];
   }
 }
+export async function getTotalPembelianByDate(date: string) {
+  const cookie = cookies().get("jwt");
+  const session = await getServerSession(options);
+  const company = session?.user.company;
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}pembelian/${date}/${company}/pembelian/total`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Cookie: `jwt=${cookie?.value}`,
+      },
+      cache: "no-store",
+    }
+  );
+  const dataPembelian = await res.json();
+  return dataPembelian;
+}
