@@ -74,6 +74,7 @@ function ProductsCardEdit(props: iProps) {
   const [messageNotif, setMessageNotif] = useState("");
 
   const [kodePenjualan, setKodePenjualan] = useState(props.kodePenjualan);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -86,7 +87,7 @@ function ProductsCardEdit(props: iProps) {
   const items: Product[] = props.items;
   const filterArray = (array: Product[]) => {
     return array.filter((el: Product) =>
-      el.nama.toLowerCase().includes(query.toUpperCase())
+      el.nama.toLowerCase().includes(query.toLowerCase())
     );
   };
 
@@ -130,6 +131,15 @@ function ProductsCardEdit(props: iProps) {
     });
   };
 
+  const handleHjualChange = (index: any, newValue: number, qty: number) => {
+    setDataPenjualan((prevData) => {
+      const newData = [...prevData];
+      newData[index].hjual = newValue;
+      newData[index].total = newValue * qty;
+      return newData;
+    });
+  };
+
   const checkOutConfirm = () => {
     closeProductModal();
     if (!confirmModalOpen) {
@@ -150,15 +160,19 @@ function ProductsCardEdit(props: iProps) {
   };
 
   const checkOut = async () => {
+    setIsProcessing(true);
     const { message } = await CheckoutUpdate(kodePenjualan, dataPenjualan);
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
       // setDataPenjualan([]);
       closeConfirmModal();
+      setIsProcessing(false);
     } else {
       openNotif();
       closeConfirmModal();
+      setIsProcessing(false);
+
       openNotif();
       setMessageNotif(message.error);
     }
@@ -198,8 +212,12 @@ function ProductsCardEdit(props: iProps) {
                 <Button color="secondary" onPress={onCloseConfirm}>
                   Tidak
                 </Button>
-                <Button color="primary" onPress={checkOut}>
-                  Ya
+                <Button
+                  color="primary"
+                  onPress={checkOut}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : "Ya"}
                 </Button>
               </ModalFooter>
             </>
@@ -214,7 +232,7 @@ function ProductsCardEdit(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10">
+      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10 overflow-scroll overflow-y-visible h-[85vh] pb-28">
         {filteredProduct.map((items) => {
           return (
             <CardInventory
@@ -245,6 +263,13 @@ function ProductsCardEdit(props: iProps) {
                                   type="number"
                                   className="bg-gray-200 rounded-lg px-2 "
                                   defaultValue={items.hjual}
+                                  onChange={(e) =>
+                                    handleHjualChange(
+                                      index,
+                                      parseInt(e.target.value),
+                                      items.qty
+                                    )
+                                  }
                                 />
                                 {/* Rp {items.hjual} */}
                               </div>

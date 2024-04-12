@@ -23,6 +23,7 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import NotificationModal from "@/app/component/NotificationModal";
 import { redirect } from "next/dist/server/api-utils";
 import { revalidate } from "@/app/lib/inventory/revalidate";
+import { Console } from "console";
 interface iUser {
   id: number;
   name: string;
@@ -72,7 +73,7 @@ function ProductsCardEdit(props: iProps) {
   const [totalPembelian, setTotalpembelian] = useState<number>(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
-
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [kodePembelian, setKodePembelian] = useState(props.kodePembelian);
 
   const currentDate = new Date();
@@ -129,6 +130,14 @@ function ProductsCardEdit(props: iProps) {
       return newData;
     });
   };
+  const handleHbeliChange = (index: any, newValue: number, qty: number) => {
+    setDataPembelian((prevData) => {
+      const newData = [...prevData];
+      newData[index].hbeli = newValue;
+      newData[index].total = newValue * qty;
+      return newData;
+    });
+  };
 
   const checkOutConfirm = () => {
     closeProductModal();
@@ -150,14 +159,18 @@ function ProductsCardEdit(props: iProps) {
   };
 
   const checkOut = async () => {
+    setIsProcessing(true);
     const { message } = await CheckoutUpdate(kodePembelian, dataPembelian);
+    console.log(message);
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
       // setDataPenjualan([]);
+      setIsProcessing(false);
       closeConfirmModal();
     } else {
       openNotif();
+      setIsProcessing(false);
       closeConfirmModal();
       openNotif();
       setMessageNotif(message.error);
@@ -198,8 +211,12 @@ function ProductsCardEdit(props: iProps) {
                 <Button color="secondary" onPress={onCloseConfirm}>
                   Tidak
                 </Button>
-                <Button color="primary" onPress={checkOut}>
-                  Ya
+                <Button
+                  color="primary"
+                  onPress={checkOut}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? "Processing..." : "Ya"}
                 </Button>
               </ModalFooter>
             </>
@@ -214,7 +231,7 @@ function ProductsCardEdit(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10">
+      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10 overflow-scroll overflow-y-visible h-[85vh] pb-28">
         {filteredProduct.map((items) => {
           return (
             <CardInventory
@@ -230,7 +247,7 @@ function ProductsCardEdit(props: iProps) {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Daftar Penjualan</ModalHeader>
+              <ModalHeader>Daftar Pembelian</ModalHeader>
               <ModalBody>
                 <div>
                   {dataPembelian &&
@@ -245,6 +262,13 @@ function ProductsCardEdit(props: iProps) {
                                   type="number"
                                   className="bg-gray-200 rounded-lg px-2 "
                                   defaultValue={items.hbeli}
+                                  onChange={(e) =>
+                                    handleHbeliChange(
+                                      index,
+                                      parseInt(e.target.value),
+                                      items.qty
+                                    )
+                                  }
                                 />
                                 {/* Rp {items.hjual} */}
                               </div>

@@ -82,7 +82,7 @@ function ProductsCard(props: iProps) {
 
   const filterArray = (array: Product[]) => {
     return array.filter((el: Product) =>
-      el.nama.toLowerCase().includes(query.toUpperCase())
+      el.nama.toLowerCase().includes(query.toLocaleLowerCase())
     );
   };
 
@@ -162,7 +162,6 @@ function ProductsCard(props: iProps) {
       openNotif();
       closeConfirmModal();
       setIsProcessing(false);
-
       setMessageNotif(message.error);
     }
   };
@@ -220,7 +219,7 @@ function ProductsCard(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-1 md:grid-cols-4  gap-1 z-10">
+      <div className="grid  grid-cols-1  overflow-scroll overflow-y-visible h-[85vh]  md:grid-cols-4  gap-1 z-10 pb-28">
         {filteredProdcut.map((items) => {
           return (
             <CardInventory

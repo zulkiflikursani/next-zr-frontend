@@ -9,9 +9,29 @@ import { getTotalPembelianByDate } from "../lib/pembelian/data";
 
 const Dashboard = async () => {
   const session = await getServerSession(options);
-  const currentDate = new Date().toISOString().split("T")[0];
-  const dataPenjualan = await getTotalPenjualanByDate(currentDate);
-  const dataPembelian = await getTotalPembelianByDate(currentDate);
+  const currentDate = new Date();
+  // Set the timezone to Makassar, Indonesia (WITA)
+  const options2: Intl.DateTimeFormatOptions = {
+    timeZone: "Asia/Makassar",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    // hour: "2-digit",
+    // minute: "2-digit",
+    // second: "2-digit",
+    // hour12: false,
+  };
+  const now = currentDate.toLocaleDateString("en-US", options2);
+
+  const [month, day, year] = now.split("/").map((part) => parseInt(part));
+
+  const formattedMonth = month < 10 ? `0${month}` : month;
+  const formattedDay = day < 10 ? `0${day}` : day;
+
+  const formattedDate = `${year}-${formattedMonth}-${formattedDay}`;
+
+  const dataPenjualan = await getTotalPenjualanByDate(formattedDate);
+  const dataPembelian = await getTotalPembelianByDate(formattedDate);
 
   return (
     <div>
