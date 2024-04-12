@@ -63,7 +63,6 @@ export async function createProduct(prevState: State, formData: FormData) {
         };
       });
     const { message } = res.message;
-    // console.log("res action", message);
     return {
       message: message,
     };

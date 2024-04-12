@@ -22,8 +22,6 @@ function FormInventory(props: iProps) {
     hjual: (props.product?.hjual as number) || 0,
     hbeli: (props.product?.hbeli as number) || 0,
   });
-  // const updateProductWithId = updateProduct.bind(null, product?.id as any);
-
   const updateProductWithId = async () => {
     try {
       const formDataObject = new FormData();
@@ -34,7 +32,6 @@ function FormInventory(props: iProps) {
         props.product?.id as any,
         formDataObject
       );
-
       if (resposnse?.message === "success") {
         setShowModal(true);
         setMessage("Berhasil Mengupdate Data");
