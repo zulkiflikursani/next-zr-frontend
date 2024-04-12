@@ -52,7 +52,7 @@ const Dashboard = async () => {
             </div>
             <Divider />
             <div className="grid grid-cols-2 gap-4 my-4">
-              <CardMenu menu="Daftar Barang" url="/dashboard/inventory" />
+              <CardMenu menu="List Barang" url="/dashboard/inventory" />
               <CardMenu menu="Penjualan" url="/dashboard/penjualan" />
               <CardMenu menu="Pembelian" url="/dashboard/pembelian" />
             </div>
