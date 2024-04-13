@@ -29,9 +29,9 @@ export const metadata: Metadata = {
     title: "Zr Kasir",
     statusBarStyle: "black-translucent",
     startupImage: [
-      "/faticon.ico",
+      "/favicon.ico",
       {
-        url: "/faticon.ico",
+        url: "/favicon.ico",
         media: "(device-width: 768px) and (device-height: 1024px)",
       },
     ],
