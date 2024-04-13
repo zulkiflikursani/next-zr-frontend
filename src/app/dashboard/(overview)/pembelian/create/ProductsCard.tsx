@@ -92,7 +92,9 @@ function ProductsCard(props: iProps) {
   };
   useEffect(() => {
     setTotqty(dataPembelian.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpembelian(dataPembelian.reduce((acc, curr) => acc + curr.total, 0));
+    setTotalpembelian(
+      dataPembelian.reduce((acc, curr) => acc + curr.total * 1, 0)
+    );
   }, [dataPembelian]);
   const handleModal = (product: Product) => {
     setDataPembelian([

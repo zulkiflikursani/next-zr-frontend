@@ -92,7 +92,9 @@ function ProductsCard(props: iProps) {
   };
   useEffect(() => {
     setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
+    setTotalpenjualan(
+      dataPenjualan.reduce((acc, curr) => acc + curr.total * 1, 0)
+    );
   }, [dataPenjualan]);
   const handleModal = (product: Product) => {
     setDataPenjualan([

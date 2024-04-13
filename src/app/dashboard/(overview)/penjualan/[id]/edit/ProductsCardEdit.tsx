@@ -99,7 +99,9 @@ function ProductsCardEdit(props: iProps) {
   useEffect(() => {
     openPoroductModal();
     setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpenjualan(dataPenjualan.reduce((acc, curr) => acc + curr.total, 0));
+    setTotalpenjualan(
+      dataPenjualan.reduce((acc, curr) => acc + curr.total * 1, 0)
+    );
   }, [dataPenjualan, openPoroductModal]);
   const handleModal = (product: Product) => {
     console.log("handle Modal");

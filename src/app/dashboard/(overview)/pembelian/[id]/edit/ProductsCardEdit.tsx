@@ -99,7 +99,9 @@ function ProductsCardEdit(props: iProps) {
   useEffect(() => {
     openPoroductModal();
     setTotqty(dataPembelian.reduce((acc, curr) => acc + curr.qty, 0));
-    setTotalpembelian(dataPembelian.reduce((acc, curr) => acc + curr.total, 0));
+    setTotalpembelian(
+      dataPembelian.reduce((acc, curr) => acc + curr.total * 1, 0)
+    );
   }, [dataPembelian, openPoroductModal]);
   const handleModal = (product: Product) => {
     console.log("handle Modal");
