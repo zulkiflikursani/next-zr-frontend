@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.error("Database Error:", error);
     // throw new Error('Failed to create invoice.');
     return NextResponse.json({
-      // failed connect
+      // failed connectgit
       message: "Database error : failed to Create invoices",
     });
   }

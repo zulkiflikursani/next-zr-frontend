@@ -28,7 +28,7 @@ function ListPembelian(pembelian: iItem) {
         const filtered = listpembelian.filter((item) =>
           item.nama_product.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        setTotalQty(filtered.reduce((acc, curr) => acc + curr.qty, 0));
+        setTotalQty(filtered.reduce((acc: number, curr) => acc + curr.qty, 0));
         setTotalPembelian(
           filtered.reduce((acc, curr) => acc + curr.qty * curr.hbeli, 0)
         );

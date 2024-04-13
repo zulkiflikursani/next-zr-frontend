@@ -23,7 +23,7 @@ function ListPenjualan({ item }: iItem) {
     const filtered = item.filter((item) =>
       item.nama_product.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const totalQty = filtered.reduce((acc, curr) => acc + curr.qty, 0);
+    const totalQty = filtered.reduce((acc, curr) => acc + curr.qty * 1, 0);
     const totalPenjualan = filtered.reduce(
       (acc, curr) => acc + curr.qty * curr.hjual,
       0
