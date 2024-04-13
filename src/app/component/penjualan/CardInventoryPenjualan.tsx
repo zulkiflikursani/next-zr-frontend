@@ -11,7 +11,7 @@ function CardInventory(props: iProps) {
   return (
     <div>
       <Card className="rounded-tr-3xl h-fit border-1 rounded-tl-none rounded-bl-3xl rounded-br-none p-0 border-gray-400">
-        <CardBody className="m-0 p-2">
+        <CardBody className="m-0 p-2" onClick={props.onClick}>
           {/* <Image
             src={"/images/bg-zr.jpg"}
             alt={props.items.nama}
@@ -41,11 +41,11 @@ function CardInventory(props: iProps) {
               </div>
             </div>
           </div>
-          <div className="flex items-center w-full space-x-2  justify-end ">
+          {/* <div className="flex items-center w-full space-x-2  justify-end ">
             <Button className="text-[10px]" size="sm" onClick={props.onClick}>
               add
             </Button>
-          </div>
+          </div> */}
         </CardBody>
       </Card>
     </div>
