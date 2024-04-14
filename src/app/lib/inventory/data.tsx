@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 import { getServerSession } from "next-auth";
 import { options } from "@/app/api/auth/[...nextauth]/options";
+import { Product } from "./defenition";
 
 async function data1(fromData: FormData) {
   return <div></div>;
@@ -46,6 +47,7 @@ export async function Products() {
     );
 
     const items = await res.json();
+    console.log("items", items);
     return items;
   } catch (error) {
     return new Error("Failed to fetch Product");

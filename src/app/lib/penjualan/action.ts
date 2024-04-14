@@ -36,58 +36,56 @@ const jsonDataScame = z.array(
   })
 );
 export async function Checkout(request: iKeranjang[]) {
-  try {
-    jsonDataScame.parse(request);
-    try {
-      const res = await fetch("/api/penjualan", {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify(request),
-      });
-      const response = await res.json();
-      return response;
-    } catch (error) {
-      console.error("Post data error");
-      //   return {
-      //     error: error,
-      //   };
-    }
-  } catch (error: any) {
-    const errorResponse: { error: string[]; status: string } = {
+  console.log(request);
+  const validate = jsonDataScame.safeParse(request);
+  if (!validate.success) {
+    const errors: string[] = validate.error.errors.map((item) => item.message);
+    const allerror = errors.join("\n");
+
+    return {
       status: "gagal",
-      error: error.errors.map((e: any) => e.message), // Extract error messages
+      message: "Invalid data format:\n" + allerror,
     };
-    return errorResponse;
   }
-  return request;
+  try {
+    const res = await fetch("/api/penjualan", {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(request),
+    });
+    const response = await res.json();
+    return response;
+  } catch (error) {
+    console.error("Post data error");
+    //   return {
+    //     error: error,
+    //   };
+  }
 }
 
 export async function CheckoutUpdate(
   kodePenjualan: string,
   request: iKeranjang[]
 ) {
-  try {
-    jsonDataScame.parse(request);
-    try {
-      const res = await fetch(`/api/penjualan/${kodePenjualan}`, {
-        method: "PUT",
-        credentials: "include",
-        body: JSON.stringify(request),
-      });
-      const response = await res.json();
-      return response;
-    } catch (error) {
-      console.error("Post data error");
-      //   return {
-      //     error: error,
-      //   };
-    }
-  } catch (error: any) {
-    const errorResponse: { error: string[]; status: string } = {
+  const validate = jsonDataScame.safeParse(request);
+  if (!validate.success) {
+    const errors: string[] = validate.error.errors.map((item) => item.message);
+    const allerror = errors.join("\n");
+
+    return {
       status: "gagal",
-      error: error.errors.map((e: any) => e.message), // Extract error messages
+      message: "Invalid data format:\n" + allerror,
     };
-    return errorResponse;
   }
-  return request;
+  try {
+    const res = await fetch(`/api/penjualan/${kodePenjualan}`, {
+      method: "PUT",
+      credentials: "include",
+      body: JSON.stringify(request),
+    });
+    const response = await res.json();
+    return response;
+  } catch (error) {
+    console.error("Post data error");
+  }
 }

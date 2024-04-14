@@ -1,7 +1,7 @@
 "use client";
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
-import { Product } from "@/app/lib/inventory/defenition";
+import { Product, iKeranjangJual } from "@/app/lib/inventory/defenition";
 import { Checkout } from "../../../../lib/penjualan/action";
 import { format } from "date-fns";
 
@@ -35,17 +35,7 @@ interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
 }
-interface iKeranjang {
-  company: string | null | undefined;
-  tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
-  product_id: string | null | undefined;
-  id_customer: string | null | undefined;
-  nama_product: string | undefined;
-  hjual: number;
-  qty: number;
-  total: number;
-}
+
 function ProductsCard(props: iProps) {
   const {
     isOpen: producModal,
@@ -63,12 +53,12 @@ function ProductsCard(props: iProps) {
     onClose: closeNotif,
   } = useDisclosure();
 
-  const [dataPenjualan, setDataPenjualan] = useState<iKeranjang[]>([]);
-  const [totqty, setTotqty] = useState<number>(0);
-  const [totalpenjualan, setTotalpenjualan] = useState<number>(0);
+  const [dataPenjualan, setDataPenjualan] = useState<iKeranjangJual[]>([]);
+  const [totqty, setTotqty] = useState(0);
+  const [totalpenjualan, setTotalpenjualan] = useState(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -106,7 +96,7 @@ function ProductsCard(props: iProps) {
         product_id: product.id.toString(),
         id_customer: "",
         nama_product: product.nama,
-        hjual: product.hjual,
+        hjual: product.hjual * 1,
         qty: 1,
         total: product.hjual,
       },
@@ -152,10 +142,11 @@ function ProductsCard(props: iProps) {
 
   const checkOut = async () => {
     setIsProcessing(true);
-    const { message } = await Checkout(dataPenjualan);
+    const respons = await Checkout(dataPenjualan);
+    console.log(respons);
 
-    if (message.status === "ok") {
-      setMessageNotif(message.message);
+    if (respons.status === "ok") {
+      setMessageNotif(respons.message);
       openNotif();
       closeConfirmModal();
       setDataPenjualan([]);
@@ -164,12 +155,11 @@ function ProductsCard(props: iProps) {
       openNotif();
       closeConfirmModal();
       setIsProcessing(false);
-      setMessageNotif(message.error);
+      setMessageNotif(respons.message);
     }
-    // console.log(penjualan);
   };
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjang[] = await dataPenjualan.filter(
+    const updateDataPenjualang: iKeranjangJual[] = await dataPenjualan.filter(
       (obj) => obj.product_id !== id
     );
 

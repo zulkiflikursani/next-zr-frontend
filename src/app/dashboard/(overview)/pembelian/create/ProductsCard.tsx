@@ -1,7 +1,7 @@
 "use client";
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
-import { Product } from "@/app/lib/inventory/defenition";
+import { Product, iKeranjangBeli } from "@/app/lib/inventory/defenition";
 import { Checkout } from "../../../../lib/pembelian/action";
 import { format } from "date-fns";
 
@@ -35,17 +35,7 @@ interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
 }
-interface iKeranjang {
-  company: string | null | undefined;
-  tanggal_transaksi: DateTime | null | undefined;
-  kode_pembelian: string | null | undefined;
-  product_id: string | null | undefined;
-  id_customer: string | null | undefined;
-  nama_product: string | undefined;
-  hbeli: number;
-  qty: number;
-  total: number;
-}
+
 function ProductsCard(props: iProps) {
   const {
     isOpen: producModal,
@@ -63,7 +53,7 @@ function ProductsCard(props: iProps) {
     onClose: closeNotif,
   } = useDisclosure();
 
-  const [dataPembelian, setDataPembelian] = useState<iKeranjang[]>([]);
+  const [dataPembelian, setDataPembelian] = useState<iKeranjangBeli[]>([]);
   const [totqty, setTotqty] = useState<number>(0);
   const [totalPembelian, setTotalpembelian] = useState<number>(0);
   const [query, setQuery] = useState("");
@@ -168,7 +158,7 @@ function ProductsCard(props: iProps) {
     }
   };
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjang[] = await dataPembelian.filter(
+    const updateDataPenjualang: iKeranjangBeli[] = await dataPembelian.filter(
       (obj) => obj.product_id !== id
     );
 

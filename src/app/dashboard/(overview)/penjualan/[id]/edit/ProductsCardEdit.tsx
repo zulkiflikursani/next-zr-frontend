@@ -1,7 +1,7 @@
 "use client";
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
-import { Product } from "@/app/lib/inventory/defenition";
+import { Product, iKeranjangJual } from "@/app/lib/inventory/defenition";
 import { Checkout, CheckoutUpdate } from "../../../../../lib/penjualan/action";
 import { format } from "date-fns";
 
@@ -17,11 +17,10 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 
-import { DateTime } from "next-auth/providers/kakao";
 import React, { useEffect, useState } from "react";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import NotificationModal from "@/app/component/NotificationModal";
-import { redirect } from "next/dist/server/api-utils";
+
 import { revalidate } from "@/app/lib/inventory/revalidate";
 interface iUser {
   id: number;
@@ -35,20 +34,10 @@ interface iUser {
 interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
-  keranjang: iKeranjang[];
+  keranjang: iKeranjangJual[];
   kodePenjualan: string;
 }
-interface iKeranjang {
-  company: string | null | undefined;
-  tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
-  product_id: string | null | undefined;
-  id_customer: string | null | undefined;
-  nama_product: string | undefined;
-  hjual: number;
-  qty: number;
-  total: number;
-}
+
 function ProductsCardEdit(props: iProps) {
   const {
     isOpen: producModal,
@@ -65,7 +54,7 @@ function ProductsCardEdit(props: iProps) {
     onOpen: openNotif,
     onClose: closeNotif,
   } = useDisclosure();
-  const [dataPenjualan, setDataPenjualan] = useState<iKeranjang[]>(
+  const [dataPenjualan, setDataPenjualan] = useState<iKeranjangJual[]>(
     props.keranjang
   );
   const [totqty, setTotqty] = useState<number>(0);
@@ -98,7 +87,7 @@ function ProductsCardEdit(props: iProps) {
   };
   useEffect(() => {
     openPoroductModal();
-    setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty, 0));
+    setTotqty(dataPenjualan.reduce((acc, curr) => acc + curr.qty * 1, 0));
     setTotalpenjualan(
       dataPenjualan.reduce((acc, curr) => acc + curr.total * 1, 0)
     );
@@ -163,7 +152,8 @@ function ProductsCardEdit(props: iProps) {
 
   const checkOut = async () => {
     setIsProcessing(true);
-    const { message } = await CheckoutUpdate(kodePenjualan, dataPenjualan);
+    const message = await CheckoutUpdate(kodePenjualan, dataPenjualan);
+
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
@@ -176,12 +166,12 @@ function ProductsCardEdit(props: iProps) {
       setIsProcessing(false);
 
       openNotif();
-      setMessageNotif(message.error);
+      setMessageNotif(message.message);
     }
   };
 
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjang[] = await dataPenjualan.filter(
+    const updateDataPenjualang: iKeranjangJual[] = await dataPenjualan.filter(
       (obj) => obj.product_id !== id
     );
     setDataPenjualan(updateDataPenjualang);

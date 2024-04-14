@@ -1,4 +1,5 @@
 import ListPenjualan from "@/app/component/penjualan/ListPenjualan";
+import { iKeranjangJual } from "@/app/lib/inventory/defenition";
 import { getPenjualanByDate } from "@/app/lib/penjualan/data";
 import React from "react";
 
@@ -24,7 +25,7 @@ async function penjualan() {
 
   const formattedDate = `${year}-${formattedMonth}-${formattedDay}`;
 
-  const dataPenjualan = await getPenjualanByDate(formattedDate);
+  const dataPenjualan: [] = await getPenjualanByDate(formattedDate);
   return (
     <div className="h-[80vh]">
       <ListPenjualan item={dataPenjualan} />

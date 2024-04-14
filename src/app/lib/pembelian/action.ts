@@ -35,31 +35,25 @@ const jsonDataScame = z.array(
   })
 );
 export async function Checkout(request: iKeranjang[]) {
-  try {
-    jsonDataScame.parse(request);
-    try {
-      const res = await fetch("/api/pembelian", {
-        method: "POST",
-        credentials: "include",
-        body: JSON.stringify(request),
-      });
-      const response = await res.json();
-      console.log("action response", response);
-      return response;
-    } catch (error) {
-      console.error("Post data error");
-      //   return {
-      //     error: error,
-      //   };
-    }
-  } catch (error: any) {
-    console.error(error);
-    const errorResponse: { error: string[]; status: string } = {
-      status: "gagal",
-      error: error.errors.map((e: any) => e.message), // Extract error messages
-    };
-    return errorResponse;
+  const validate = jsonDataScame.safeParse(request);
+  if (!validate.success) {
+    const message = validate.error.flatten().fieldErrors;
+    console.log(message);
+    return message;
   }
+
+  try {
+    const res = await fetch("/api/pembelian", {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify(request),
+    });
+    const response = await res.json();
+    return response;
+  } catch (error) {
+    console.error("Post data error");
+  }
+
   // return request;
 }
 
@@ -83,12 +77,6 @@ export async function CheckoutUpdate(
       //     error: error,
       //   };
     }
-  } catch (error: any) {
-    const errorResponse: { error: string[]; status: string } = {
-      status: "gagal",
-      error: error.errors.map((e: any) => e.message), // Extract error messages
-    };
-    return errorResponse;
-  }
+  } catch (error: any) {}
   return request;
 }

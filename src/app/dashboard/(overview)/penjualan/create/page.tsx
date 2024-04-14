@@ -9,6 +9,7 @@ import { options } from "@/app/api/auth/[...nextauth]/options";
 
 const page = async () => {
   const dataItems: Product[] = await Products();
+  // console.log(dataItems);
   const session = await getServerSession(options);
 
   return (

@@ -22,13 +22,14 @@ function CardListPenjualan(props: iProps) {
                 <div>{props.items.kode_penjualan}</div>
                 <div>{props.items.nama_product}</div>
                 <div className="min-w-[40px] text-right">
-                  {props.items.qty} pcs
+                  {props.items.qty}
+                  <span> pcs</span>
                 </div>
                 <div className="min-w-[60px] text-right">
                   Rp.{props.items.hjual}
                 </div>
                 <div className="min-w-[70px] text-right">
-                  Rp. {props.items.qty * props.items.hjual}
+                  <span>Rp.</span> {props.items.qty * props.items.hjual}
                 </div>
               </div>
               {/* </div>÷ */}

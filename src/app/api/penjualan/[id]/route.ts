@@ -20,9 +20,7 @@ export async function PUT(
       }
     );
     const response = await res.json();
-    return NextResponse.json({
-      message: response,
-    });
+    return NextResponse.json(response);
   } catch (error) {
     console.error(error);
   }
