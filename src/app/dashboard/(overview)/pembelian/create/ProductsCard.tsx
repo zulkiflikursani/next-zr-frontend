@@ -194,7 +194,7 @@ function ProductsCard(props: iProps) {
                 <Button
                   color="primary"
                   onPress={checkOut}
-                  disabled={isProcessing}
+                  isDisabled={isProcessing}
                 >
                   {isProcessing ? "Processing..." : "Ya"}
                 </Button>
