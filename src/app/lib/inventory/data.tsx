@@ -47,7 +47,6 @@ export async function Products() {
     );
 
     const items = await res.json();
-    console.log("items", items);
     return items;
   } catch (error) {
     return new Error("Failed to fetch Product");

@@ -2,7 +2,7 @@
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
 import { Product, iKeranjangJual } from "@/app/lib/inventory/defenition";
-import { Checkout, CheckoutUpdate } from "../../../../../lib/penjualan/action";
+import { CheckoutUpdate } from "../../../../../lib/penjualan/action";
 import { format } from "date-fns";
 
 import {
@@ -14,6 +14,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 
@@ -64,6 +66,20 @@ function ProductsCardEdit(props: iProps) {
 
   const [kodePenjualan, setKodePenjualan] = useState(props.kodePenjualan);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [methodBayar, setMethodBayar] = useState(
+    dataPenjualan[0]?.metode_bayar
+  );
+  const [methodError, setMethodError] = useState("");
+  const methode_bayar_items = [
+    {
+      value: "1",
+      label: "Tunai",
+    },
+    {
+      value: "2",
+      label: "Non tunai",
+    },
+  ];
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -106,6 +122,7 @@ function ProductsCardEdit(props: iProps) {
         hjual: product.hjual,
         qty: 1,
         total: product.hjual,
+        metode_bayar: methodBayar,
       },
     ]);
     if (!producModal) {
@@ -132,13 +149,16 @@ function ProductsCardEdit(props: iProps) {
   };
 
   const checkOutConfirm = () => {
-    closeProductModal();
-    if (!confirmModalOpen) {
-      closeConfirmModal();
-      openConfirmModal();
+    if (methodBayar === "") {
+      setMethodError("Silahkan isi metode pembayaran");
+    } else {
+      closeProductModal();
+      if (!confirmModalOpen) {
+        console.log(dataPenjualan);
+        closeConfirmModal();
+        openConfirmModal();
+      }
     }
-    console.log("openConfirmModal");
-    // console.log("confirm", confirm);
   };
 
   const onCloseConfirm = () => {
@@ -153,6 +173,7 @@ function ProductsCardEdit(props: iProps) {
   const checkOut = async () => {
     setIsProcessing(true);
     const message = await CheckoutUpdate(kodePenjualan, dataPenjualan);
+    console.log(message);
 
     if (message.status === "ok") {
       setMessageNotif(message.message);
@@ -170,6 +191,18 @@ function ProductsCardEdit(props: iProps) {
     }
   };
 
+  const handleMethodBayar = async (e: any) => {
+    setMethodError("");
+    const newMethodBayar = e.target.value;
+    setMethodBayar(newMethodBayar);
+    setDataPenjualan((prevData: iKeranjangJual[]) => {
+      const updateData = prevData.map((item: iKeranjangJual) => ({
+        ...item,
+        metode_bayar: newMethodBayar,
+      }));
+      return updateData;
+    });
+  };
   const removeKeranjangProduct = async (id: string) => {
     const updateDataPenjualang: iKeranjangJual[] = await dataPenjualan.filter(
       (obj) => obj.product_id !== id
@@ -316,6 +349,29 @@ function ProductsCardEdit(props: iProps) {
                 </Card>
               </ModalBody>
               <ModalFooter>
+                <div className="min-w-40 flex flex-col">
+                  {methodError ? (
+                    <p className="text-red-400 text-[10px]">{methodError}</p>
+                  ) : (
+                    ""
+                  )}
+                  <Select
+                    size="sm"
+                    label="Metode pembayaran"
+                    placeholder="Pilih metode"
+                    className="max-w-xs"
+                    name="method_bayar"
+                    defaultSelectedKeys={[methodBayar]}
+                    selectedKeys={methodBayar}
+                    onChange={handleMethodBayar}
+                  >
+                    {methode_bayar_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
                 <Button color="secondary" onPress={onClose}>
                   Close
                 </Button>

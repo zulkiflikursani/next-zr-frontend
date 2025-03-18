@@ -14,6 +14,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 
@@ -59,6 +61,22 @@ function ProductsCard(props: iProps) {
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [methodBayar, setMethodBayar] = useState("1");
+  const [methodError, setMethodError] = useState("");
+  const methode_bayar_items = [
+    {
+      value: "1",
+      label: "Tunai",
+    },
+    {
+      value: "2",
+      label: "Non tunai",
+    },
+    {
+      value: "3",
+      label: "Transfer Stok",
+    },
+  ];
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -99,6 +117,7 @@ function ProductsCard(props: iProps) {
         hjual: product.hjual * 1,
         qty: 1,
         total: product.hjual,
+        metode_bayar: methodBayar,
       },
     ]);
     if (!producModal) {
@@ -120,18 +139,43 @@ function ProductsCard(props: iProps) {
       const newData = [...prevData];
       newData[index].hjual = newValue;
       newData[index].total = newValue * qty;
-
       return newData;
     });
   };
 
+  const handleMethodBayar = async (e: any) => {
+    setMethodError("");
+    const newMethodBayar = e.target.value;
+    setMethodBayar(newMethodBayar);
+    setDataPenjualan((prevData: iKeranjangJual[]) => {
+      if (e.target.value === "3") {
+        const updateData = prevData.map((item: iKeranjangJual) => ({
+          ...item,
+          metode_bayar: newMethodBayar,
+          hjual: 0,
+        }));
+        return updateData;
+      } else {
+        const updateData = prevData.map((item: iKeranjangJual) => ({
+          ...item,
+          metode_bayar: newMethodBayar,
+        }));
+        return updateData;
+      }
+    });
+  };
+
   const checkOutConfirm = () => {
-    closeProductModal();
-    if (!confirmModalOpen) {
-      closeConfirmModal();
-      openConfirmModal();
+    if (methodBayar === "") {
+      setMethodError("Silahkan isi metode pembayaran");
+    } else {
+      closeProductModal();
+      if (!confirmModalOpen) {
+        console.log(dataPenjualan);
+        closeConfirmModal();
+        openConfirmModal();
+      }
     }
-    console.log("openConfirmModal");
     // console.log("confirm", confirm);
   };
 
@@ -144,7 +188,6 @@ function ProductsCard(props: iProps) {
     setIsProcessing(true);
     const respons = await Checkout(dataPenjualan);
     console.log(respons);
-
     if (respons.status === "ok") {
       setMessageNotif(respons.message);
       openNotif();
@@ -304,6 +347,29 @@ function ProductsCard(props: iProps) {
                 </Card>
               </ModalBody>
               <ModalFooter>
+                <div className="min-w-40 flex flex-col">
+                  {methodError ? (
+                    <p className="text-red-400 text-[10px]">{methodError}</p>
+                  ) : (
+                    ""
+                  )}
+                  <Select
+                    size="sm"
+                    label="Metode pembayaran"
+                    placeholder="Pilih metode"
+                    className="max-w-xs"
+                    name="method_bayar"
+                    defaultSelectedKeys={[methodBayar]}
+                    selectedKeys={methodBayar}
+                    onChange={handleMethodBayar}
+                  >
+                    {methode_bayar_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
                 <Button color="secondary" onPress={onClose}>
                   Close
                 </Button>

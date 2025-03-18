@@ -56,6 +56,7 @@ export async function getPembelianById(id: string) {
         hbeli: items.hbeli,
         qty: items.qty,
         total: total,
+        metode_bayar: items.metode_bayar,
       });
     });
     return keranjang;

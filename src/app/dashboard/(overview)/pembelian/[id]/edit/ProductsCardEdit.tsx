@@ -1,7 +1,7 @@
 "use client";
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
-import { Product } from "@/app/lib/inventory/defenition";
+import { Product, iKeranjangBeli } from "@/app/lib/inventory/defenition";
 import { Checkout, CheckoutUpdate } from "../../../../../lib/pembelian/action";
 import { format } from "date-fns";
 
@@ -14,6 +14,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 
@@ -49,6 +51,7 @@ interface iKeranjang {
   hbeli: number;
   qty: number;
   total: number;
+  metode_bayar: string;
 }
 function ProductsCardEdit(props: iProps) {
   const {
@@ -75,6 +78,22 @@ function ProductsCardEdit(props: iProps) {
   const [messageNotif, setMessageNotif] = useState("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [kodePembelian, setKodePembelian] = useState(props.kodePembelian);
+  const [methodBayar, setMethodBayar] = useState(dataPembelian[0].metode_bayar);
+  const [methodError, setMethodError] = useState("");
+  const methode_bayar_items = [
+    {
+      value: "1",
+      label: "Tunai",
+    },
+    {
+      value: "2",
+      label: "Non tunai",
+    },
+    {
+      value: "3",
+      label: "Transfer Stok",
+    },
+  ];
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -117,6 +136,7 @@ function ProductsCardEdit(props: iProps) {
         hbeli: product.hbeli,
         qty: 1,
         total: product.hjual,
+        metode_bayar: methodBayar,
       },
     ]);
     if (!producModal) {
@@ -142,10 +162,14 @@ function ProductsCardEdit(props: iProps) {
   };
 
   const checkOutConfirm = () => {
-    closeProductModal();
-    if (!confirmModalOpen) {
-      closeConfirmModal();
-      openConfirmModal();
+    if (methodBayar === "") {
+      setMethodError("Silahkan isi metode pembayaran");
+    } else {
+      closeProductModal();
+      if (!confirmModalOpen) {
+        closeConfirmModal();
+        openConfirmModal();
+      }
     }
     console.log("openConfirmModal");
     // console.log("confirm", confirm);
@@ -159,7 +183,27 @@ function ProductsCardEdit(props: iProps) {
     closeNotif();
     revalidate("/dashboard/pembelian", "page", true);
   };
-
+  const handleMethodBayar = async (e: any) => {
+    setMethodError("");
+    const newMethodBayar = e.target.value;
+    setMethodBayar(newMethodBayar);
+    setDataPembelian((prevData: iKeranjangBeli[]) => {
+      if (e.target.value === "3") {
+        const updateData = prevData.map((item: iKeranjangBeli) => ({
+          ...item,
+          metode_bayar: newMethodBayar,
+          hbeli: 0,
+        }));
+        return updateData;
+      } else {
+        const updateData = prevData.map((item: iKeranjangBeli) => ({
+          ...item,
+          metode_bayar: newMethodBayar,
+        }));
+        return updateData;
+      }
+    });
+  };
   const checkOut = async () => {
     setIsProcessing(true);
     const { message } = await CheckoutUpdate(kodePembelian, dataPembelian);
@@ -325,6 +369,29 @@ function ProductsCardEdit(props: iProps) {
                 </Card>
               </ModalBody>
               <ModalFooter>
+                <div className="min-w-40 flex flex-col">
+                  {methodError ? (
+                    <p className="text-red-400 text-[10px]">{methodError}</p>
+                  ) : (
+                    ""
+                  )}
+                  <Select
+                    size="sm"
+                    label="Metode pembayaran"
+                    placeholder="Pilih metode"
+                    className="max-w-xs"
+                    name="method_bayar"
+                    defaultSelectedKeys={[methodBayar]}
+                    selectedKeys={methodBayar}
+                    onChange={handleMethodBayar}
+                  >
+                    {methode_bayar_items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
                 <Button color="secondary" onPress={onClose}>
                   Close
                 </Button>

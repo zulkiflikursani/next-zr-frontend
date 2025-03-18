@@ -46,15 +46,23 @@ const Dashboard = async () => {
             <div className="mb-4">
               <CardComponent
                 total_value={dataPenjualan.total_penjualan}
-                totalQty={dataPenjualan.total_qty}
+                totalQty={
+                  parseInt(dataPenjualan.total_qty) +
+                  parseInt(dataPenjualan.total_qty_non_cash)
+                }
                 total_pembelian={dataPembelian.total_pembelian}
               />
             </div>
             <Divider />
             <div className="grid grid-cols-2 gap-4 my-4">
-              <CardMenu menu="List Barang" url="/dashboard/inventory" />
               <CardMenu menu="Penjualan" url="/dashboard/penjualan" />
               <CardMenu menu="Pembelian" url="/dashboard/pembelian" />
+            </div>
+            <Divider />
+            <div className="grid grid-cols-2 gap-4 my-4">
+              <CardMenu menu="List Barang" url="/dashboard/inventory" />
+              <CardMenu menu="Produksi" url="/dashboard/produksi" />
+              <CardMenu menu="Setor Uang" url="/dashboard/setor" />
             </div>
           </div>
         ) : (

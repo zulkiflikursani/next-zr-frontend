@@ -10,6 +10,7 @@ interface iKeranjang {
   hbeli: number;
   qty: number;
   total: number;
+  metode_bayar: string;
 }
 
 const jsonDataScame = z.array(
@@ -32,13 +33,13 @@ const jsonDataScame = z.array(
     nama_product: z.string(),
     hbeli: z.number(),
     qty: z.number(),
+    metode_bayar: z.string(),
   })
 );
 export async function Checkout(request: iKeranjang[]) {
   const validate = jsonDataScame.safeParse(request);
   if (!validate.success) {
     const message = validate.error.flatten().fieldErrors;
-    console.log(message);
     return message;
   }
 

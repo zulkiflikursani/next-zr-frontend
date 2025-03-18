@@ -1,29 +1,27 @@
 import { DateTime } from "next-auth/providers/kakao";
 
-export type iPenjualan = {
+export type iProduksi = {
   id: number;
   company: string;
   tanggal_transaksi: DateTime;
-  kode_penjualan: string;
+  kode_pembelian: string;
   product_id: string;
   id_customer: string | null;
   nama_product: string;
-  hjual: number;
+  hbeli: number;
   qty: number;
   created_at: string | null;
   updated_at: string | null;
-  metode_bayar: string;
 };
 
 export type iKeranjang = {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
-  metode_bayar: string;
 };

@@ -21,6 +21,7 @@ export type iKeranjangJual = {
   hjual: number;
   qty: number;
   total: number;
+  metode_bayar: string;
 };
 
 export type iKeranjangBeli = {
@@ -33,4 +34,5 @@ export type iKeranjangBeli = {
   hbeli: number;
   qty: number;
   total: number;
+  metode_bayar: string;
 };

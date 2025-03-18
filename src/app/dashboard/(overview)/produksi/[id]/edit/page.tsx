@@ -6,20 +6,20 @@ import { getServerSession } from "next-auth";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import { Products } from "@/app/lib/inventory/data";
 import { DateTime } from "next-auth/providers/kakao";
+import { getProduksiById } from "@/app/lib/produksi/data";
 interface iKeranjang {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
-  metode_bayar: string;
 }
 async function page({ params }: { params: { id: string } }) {
-  const dataPenjualan: iKeranjang[] = await getPenjualanById(params.id);
+  const dataPembelian: iKeranjang[] = await getProduksiById(params.id);
   const items: Product[] = await Products();
   const session = await getServerSession(options);
 
@@ -30,8 +30,8 @@ async function page({ params }: { params: { id: string } }) {
       <ProductsCardEdit
         items={items}
         userInfo={session?.user}
-        keranjang={dataPenjualan}
-        kodePenjualan={params.id}
+        keranjang={dataPembelian}
+        kodePembelian={params.id}
       />
     </div>
   );

@@ -1,14 +1,13 @@
 import { DateTime } from "next-auth/providers/kakao";
-import { iPenjualan } from "./defenition";
 import { z } from "zod";
 interface iKeranjang {
   company: string | null | undefined;
   tanggal_transaksi: DateTime | null | undefined;
-  kode_penjualan: string | null | undefined;
+  kode_pembelian: string | null | undefined;
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
-  hjual: number;
+  hbeli: number;
   qty: number;
   total: number;
   metode_bayar: string;
@@ -28,29 +27,25 @@ const jsonDataScame = z.array(
           "Tanggal transaksi format. Expected format: YYYY-MM-DD HH:MM:SS",
       }
     ),
-    kode_penjualan: z.string(),
+    kode_pembelian: z.string(),
     product_id: z.string(),
     id_customer: z.string().nullable(),
     nama_product: z.string(),
-    hjual: z.number(),
+    hbeli: z.number(),
     qty: z.number(),
     metode_bayar: z.string(),
   })
 );
 export async function Checkout(request: iKeranjang[]) {
-  console.log(request);
   const validate = jsonDataScame.safeParse(request);
   if (!validate.success) {
-    const errors: string[] = validate.error.errors.map((item) => item.message);
-    const allerror = errors.join("\n");
-
-    return {
-      status: "gagal",
-      message: "Invalid data format:\n" + allerror,
-    };
+    const message = validate.error.flatten().fieldErrors;
+    console.log(message);
+    return message;
   }
+
   try {
-    const res = await fetch("/api/penjualan", {
+    const res = await fetch("/api/produksi", {
       method: "POST",
       credentials: "include",
       body: JSON.stringify(request),
@@ -59,35 +54,31 @@ export async function Checkout(request: iKeranjang[]) {
     return response;
   } catch (error) {
     console.error("Post data error");
-    //   return {
-    //     error: error,
-    //   };
   }
+
+  // return request;
 }
 
 export async function CheckoutUpdate(
-  kodePenjualan: string,
+  kodePembelian: string,
   request: iKeranjang[]
 ) {
-  const validate = jsonDataScame.safeParse(request);
-  if (!validate.success) {
-    const errors: string[] = validate.error.errors.map((item) => item.message);
-    const allerror = errors.join("\n");
-
-    return {
-      status: "gagal",
-      message: "Invalid data format:\n" + allerror,
-    };
-  }
   try {
-    const res = await fetch(`/api/penjualan/${kodePenjualan}`, {
-      method: "PUT",
-      credentials: "include",
-      body: JSON.stringify(request),
-    });
-    const response = await res.json();
-    return response;
-  } catch (error) {
-    console.error("Post data error");
-  }
+    jsonDataScame.parse(request);
+    try {
+      const res = await fetch(`/api/produksi/${kodePembelian}`, {
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify(request),
+      });
+      const response = await res.json();
+      return response;
+    } catch (error) {
+      console.error("Post data error");
+      //   return {
+      //     error: error,
+      //   };
+    }
+  } catch (error: any) {}
+  return request;
 }

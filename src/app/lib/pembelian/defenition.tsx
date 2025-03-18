@@ -10,6 +10,7 @@ export type iPembelian = {
   nama_product: string;
   hbeli: number;
   qty: number;
+  metode_bayar: string;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -21,6 +22,7 @@ export type iKeranjang = {
   product_id: string | null | undefined;
   id_customer: string | null | undefined;
   nama_product: string | undefined;
+  metode_bayar: string;
   hbeli: number;
   qty: number;
   total: number;

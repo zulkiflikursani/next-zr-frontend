@@ -1,8 +1,8 @@
 "use client";
 import SearchInputComponent from "@/app/component/SearchInputComponent";
 import CardInventory from "@/app/component/penjualan/CardInventoryPenjualan";
-import { Product, iKeranjangBeli } from "@/app/lib/inventory/defenition";
-import { Checkout } from "../../../../lib/pembelian/action";
+import { Product } from "@/app/lib/inventory/defenition";
+import { Checkout, CheckoutUpdate } from "../../../../../lib/produksi/action";
 import { format } from "date-fns";
 
 import {
@@ -14,16 +14,16 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 
 import { DateTime } from "next-auth/providers/kakao";
 import React, { useEffect, useState } from "react";
-import TrashIcon from "@heroicons/react/24/solid/TrashIcon";
+import { TrashIcon } from "@heroicons/react/24/solid";
 import NotificationModal from "@/app/component/NotificationModal";
-
+import { redirect } from "next/dist/server/api-utils";
+import { revalidate } from "@/app/lib/inventory/revalidate";
+import { Console } from "console";
 interface iUser {
   id: number;
   name: string;
@@ -36,9 +36,21 @@ interface iUser {
 interface iProps {
   items: Product[];
   userInfo: iUser | undefined;
+  keranjang: iKeranjang[];
+  kodePembelian: string;
 }
-
-function ProductsCard(props: iProps) {
+interface iKeranjang {
+  company: string | null | undefined;
+  tanggal_transaksi: DateTime | null | undefined;
+  kode_pembelian: string | null | undefined;
+  product_id: string | null | undefined;
+  id_customer: string | null | undefined;
+  nama_product: string | undefined;
+  hbeli: number;
+  qty: number;
+  total: number;
+}
+function ProductsCardEdit(props: iProps) {
   const {
     isOpen: producModal,
     onOpen: openPoroductModal,
@@ -54,29 +66,15 @@ function ProductsCard(props: iProps) {
     onOpen: openNotif,
     onClose: closeNotif,
   } = useDisclosure();
-
-  const [dataPembelian, setDataPembelian] = useState<iKeranjangBeli[]>([]);
+  const [dataPembelian, setDataPembelian] = useState<iKeranjang[]>(
+    props.keranjang
+  );
   const [totqty, setTotqty] = useState<number>(0);
   const [totalPembelian, setTotalpembelian] = useState<number>(0);
   const [query, setQuery] = useState("");
   const [messageNotif, setMessageNotif] = useState("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [methodBayar, setMethodBayar] = useState("1");
-  const [methodError, setMethodError] = useState("");
-  const methode_bayar_items = [
-    {
-      value: "1",
-      label: "Tunai",
-    },
-    {
-      value: "2",
-      label: "Non tunai",
-    },
-    {
-      value: "3",
-      label: "Transfer Stok",
-    },
-  ];
+  const [kodePembelian, setKodePembelian] = useState(props.kodePembelian);
 
   const currentDate = new Date();
   function formatDate(date: Date) {
@@ -87,37 +85,38 @@ function ProductsCard(props: iProps) {
 
   const formattedDate = formatDate(currentDate);
   const items: Product[] = props.items;
-
   const filterArray = (array: Product[]) => {
     return array.filter((el: Product) =>
-      el.nama.toLowerCase().includes(query.toLocaleLowerCase())
+      el.nama.toLowerCase().includes(query.toLowerCase())
     );
   };
 
-  const filteredProdcut: Product[] = filterArray(items);
+  const filteredProduct: Product[] = filterArray(items);
   const handleChange = (e: any) => {
+    console.log("on Search");
     setQuery(e.target.value);
   };
   useEffect(() => {
+    openPoroductModal();
     setTotqty(dataPembelian.reduce((acc, curr) => acc + curr.qty, 0));
     setTotalpembelian(
       dataPembelian.reduce((acc, curr) => acc + curr.total * 1, 0)
     );
-  }, [dataPembelian]);
+  }, [dataPembelian, openPoroductModal]);
   const handleModal = (product: Product) => {
+    console.log("handle Modal");
     setDataPembelian([
       ...dataPembelian,
       {
         company: props.userInfo?.company,
         tanggal_transaksi: formattedDate,
-        kode_pembelian: "asdasd",
+        kode_pembelian: kodePembelian,
         product_id: product.id.toString(),
         id_customer: "",
         nama_product: product.nama,
         hbeli: product.hbeli,
         qty: 1,
-        total: product.hbeli,
-        metode_bayar: methodBayar,
+        total: product.hjual,
       },
     ]);
     if (!producModal) {
@@ -133,8 +132,7 @@ function ProductsCard(props: iProps) {
       return newData;
     });
   };
-
-  const handleHjualChange = (index: any, newValue: number, qty: number) => {
+  const handleHbeliChange = (index: any, newValue: number, qty: number) => {
     setDataPembelian((prevData) => {
       const newData = [...prevData];
       newData[index].hbeli = newValue;
@@ -142,37 +140,12 @@ function ProductsCard(props: iProps) {
       return newData;
     });
   };
-  const handleMethodBayar = async (e: any) => {
-    setMethodError("");
-    const newMethodBayar = e.target.value;
-    setMethodBayar(newMethodBayar);
-    setDataPembelian((prevData: iKeranjangBeli[]) => {
-      if (e.target.value === "3") {
-        const updateData = prevData.map((item: iKeranjangBeli) => ({
-          ...item,
-          metode_bayar: newMethodBayar,
-          hbeli: 0,
-        }));
-        return updateData;
-      } else {
-        const updateData = prevData.map((item: iKeranjangBeli) => ({
-          ...item,
-          metode_bayar: newMethodBayar,
-        }));
-        return updateData;
-      }
-    });
-  };
 
   const checkOutConfirm = () => {
-    if (methodBayar === "") {
-      setMethodError("Silahkan isi metode pembayaran");
-    } else {
-      closeProductModal();
-      if (!confirmModalOpen) {
-        closeConfirmModal();
-        openConfirmModal();
-      }
+    closeProductModal();
+    if (!confirmModalOpen) {
+      closeConfirmModal();
+      openConfirmModal();
     }
     console.log("openConfirmModal");
     // console.log("confirm", confirm);
@@ -182,29 +155,33 @@ function ProductsCard(props: iProps) {
     closeConfirmModal();
   };
 
+  const onCloseNotif = () => {
+    closeNotif();
+    revalidate("/dashboard/produksi", "page", true);
+  };
+
   const checkOut = async () => {
     setIsProcessing(true);
-
-    const { message } = await Checkout(dataPembelian);
-
+    const { message } = await CheckoutUpdate(kodePembelian, dataPembelian);
     if (message.status === "ok") {
       setMessageNotif(message.message);
       openNotif();
-      closeConfirmModal();
-      setDataPembelian([]);
+      // setDataPenjualan([]);
       setIsProcessing(false);
+      closeConfirmModal();
     } else {
       openNotif();
-      closeConfirmModal();
       setIsProcessing(false);
+      closeConfirmModal();
+      openNotif();
       setMessageNotif(message.error);
     }
   };
+
   const removeKeranjangProduct = async (id: string) => {
-    const updateDataPenjualang: iKeranjangBeli[] = await dataPembelian.filter(
+    const updateDataPenjualang: iKeranjang[] = await dataPembelian.filter(
       (obj) => obj.product_id !== id
     );
-
     setDataPembelian(updateDataPenjualang);
     return updateDataPenjualang;
   };
@@ -217,9 +194,10 @@ function ProductsCard(props: iProps) {
         <NotificationModal
           message={messageNotif}
           isOpen={isOpenNotif}
-          onClose={closeNotif}
+          onClose={onCloseNotif}
         />
       )}
+      {/* confirm modal */}
       <Modal size="5xl" isOpen={confirmModalOpen} onClose={onCloseConfirm}>
         <ModalContent>
           {(onClose) => (
@@ -254,8 +232,8 @@ function ProductsCard(props: iProps) {
         />
       </div>
 
-      <div className="grid  grid-cols-1   md:grid-cols-4  overflow-scroll overflow-y-visible h-[85vh] gap-1 z-10 pb-28">
-        {filteredProdcut.map((items) => {
+      <div className="grid  grid-cols-1 md:grid-cols-5  gap-1 z-10 overflow-scroll overflow-y-visible h-[85vh] pb-28">
+        {filteredProduct.map((items) => {
           return (
             <CardInventory
               key={items.id}
@@ -270,7 +248,7 @@ function ProductsCard(props: iProps) {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Daftar Penjualan</ModalHeader>
+              <ModalHeader>Daftar Produksi</ModalHeader>
               <ModalBody>
                 <div>
                   {dataPembelian &&
@@ -283,10 +261,10 @@ function ProductsCard(props: iProps) {
                                 <div>{items.nama_product}</div>
                                 <input
                                   type="number"
-                                  className="bg-gray-200 rounded-lg px-2 appearance-none  "
+                                  className="bg-gray-200 rounded-lg px-2 "
                                   defaultValue={items.hbeli}
                                   onChange={(e) =>
-                                    handleHjualChange(
+                                    handleHbeliChange(
                                       index,
                                       parseInt(e.target.value),
                                       items.qty
@@ -314,7 +292,7 @@ function ProductsCard(props: iProps) {
                                 <div>Rp {items.total}</div>
                               </div>
                               <div
-                                className="flex items-center col-span-1 justify-center rounded-lg hover:bg-primary hover:text-white"
+                                className="flex items-center col-span-1"
                                 onClick={() =>
                                   removeKeranjangProduct(
                                     items.product_id as string
@@ -346,29 +324,6 @@ function ProductsCard(props: iProps) {
                 </Card>
               </ModalBody>
               <ModalFooter>
-                <div className="min-w-40 flex flex-col">
-                  {methodError ? (
-                    <p className="text-red-400 text-[10px]">{methodError}</p>
-                  ) : (
-                    ""
-                  )}
-                  <Select
-                    size="sm"
-                    label="Metode pembayaran"
-                    placeholder="Pilih metode"
-                    className="max-w-xs"
-                    name="method_bayar"
-                    defaultSelectedKeys={[methodBayar]}
-                    selectedKeys={methodBayar}
-                    onChange={handleMethodBayar}
-                  >
-                    {methode_bayar_items.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
                 <Button color="secondary" onPress={onClose}>
                   Close
                 </Button>
@@ -384,4 +339,4 @@ function ProductsCard(props: iProps) {
   );
 }
 
-export default ProductsCard;
+export default ProductsCardEdit;

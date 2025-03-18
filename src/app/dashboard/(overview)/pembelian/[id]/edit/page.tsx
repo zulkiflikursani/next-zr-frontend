@@ -17,6 +17,7 @@ interface iKeranjang {
   hbeli: number;
   qty: number;
   total: number;
+  metode_bayar: string;
 }
 async function page({ params }: { params: { id: string } }) {
   const dataPembelian: iKeranjang[] = await getPembelianById(params.id);
